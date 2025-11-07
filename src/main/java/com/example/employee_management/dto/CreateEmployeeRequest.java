@@ -1,31 +1,26 @@
 package com.example.employee_management.dto;
 
 public class CreateEmployeeRequest {
-	private String name;
-    private int id;
-    private String password;
-    
+    private String name;
+    private String email;
+    private Long departmentId; 
+
     public String getName() {
         return name;
     }
-
     public void setName(String name) {
         this.name = name;
     }
-
-    public int getId() {
-        return id;
+    public String getEmail() {
+        return email;
     }
-
-    public void setId(int id) {
-        this.id = id;
+    public void setEmail(String email) {
+        this.email = email;
     }
-
-    public String getPassword() {
-        return password;
+    public Long getDepartmentId() {
+        return departmentId;
     }
-
-    public void setPassword(String password) {
-        this.password = password;
+    public void setDepartmentId(Long departmentId) {
+        this.departmentId = departmentId;
     }
 }

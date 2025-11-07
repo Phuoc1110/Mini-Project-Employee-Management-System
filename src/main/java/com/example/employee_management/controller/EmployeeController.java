@@ -1,60 +1,68 @@
 package com.example.employee_management.controller;
 
-import com.example.employee_management.dto.CreateEmployeeRequest;
+import com.example.employee_management.dto.CreateEmployeeRequest; // Import DTO
 import com.example.employee_management.model.Employee;
 import com.example.employee_management.service.EmployeeService;
-
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/employees")
 public class EmployeeController {
 
     private final EmployeeService employeeService;
-    
+
     @Autowired
     public EmployeeController(EmployeeService employeeService) {
         this.employeeService = employeeService;
     }
 
-//    @GetMapping("/create")
-//    public String createEmployee(
-//        @RequestParam String name,
-//        @RequestParam int id,
-//        @RequestParam String password
-//    ) {
-//        return employeeService.createEmployee(name, id, password);
-//    }
+    /**
+     * Lab 4: Cập nhật API POST /add
+     * - Giờ đây nó nhận DTO thay vì các RequestParam riêng lẻ
+     */
     @PostMapping("/add")
     public ResponseEntity<Employee> createEmployee(@RequestBody CreateEmployeeRequest request) {
-        Employee createdEmployee = employeeService.createEmployee(
-            request.getName(),
-            request.getId(),
-            request.getPassword()
-        );
-        
-        // Trả về HTTP Status 201 Created cùng với đối tượng nhân viên vừa tạo
+        // Gọi hàm createEmployee mới trong service
+        Employee createdEmployee = employeeService.createEmployee(request);
         return new ResponseEntity<>(createdEmployee, HttpStatus.CREATED);
     }
-    
+
     @GetMapping("/list")
-    public ResponseEntity<List<Employee>> listEmployees() { 
+    public ResponseEntity<List<Employee>> listEmployees() {
         List<Employee> allEmployees = employeeService.listEmployees();
-        
-        // Trả về HTTP Status 200 OK cùng với danh sách nhân viên
         return ResponseEntity.ok(allEmployees);
     }
-    
-    @GetMapping("/search")
-    public String searchEmployeeByName(@RequestParam(required = false) String name) {
-        if (name != null) {
-            return "Đang tìm kiếm nhân viên với tên: " + name;
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Employee> getEmployeeById(@PathVariable Long id) { // Đổi int sang Long
+        Employee found = employeeService.findEmployeeById(id);
+        if (found != null) {
+            return ResponseEntity.ok(found);
+        } else {
+            // Trả về 404 Not Found nếu không tìm thấy
+            return ResponseEntity.notFound().build();
         }
-        return "Vui lòng cung cấp tham số 'name'";
     }
+
+    /**
+     * Lab 4: API Tìm kiếm MỚI (Task của Lab)
+     * - Endpoint: /employees/search
+     * - Tham số: ?query=...
+     */
+    @GetMapping("/search")
+    public ResponseEntity<List<Employee>> searchEmployees(@RequestParam String query) {
+        List<Employee> results = employeeService.searchEmployees(query);
+        return ResponseEntity.ok(results);
+    }
+
+    /*
+    // XÓA BỎ API GET /create CŨ CỦA LAB 3
+    @GetMapping("/create")
+    public String createEmployee(...) { ... }
+    */
 }

@@ -1,49 +1,52 @@
 package com.example.employee_management.service;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import com.example.employee_management.dto.CreateEmployeeRequest;
+import com.example.employee_management.model.Department;
+import com.example.employee_management.model.Employee;
+import com.example.employee_management.repository.DepartmentRepository;
+import com.example.employee_management.repository.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.employee_management.config.SimplePasswordEncoder;
-import com.example.employee_management.model.Employee;
+import java.util.List;
 
 @Service
 public class EmployeeService {
-	private final UtilityService utilityService;
-    private final SimplePasswordEncoder passwordEncoder;
-    private final List<Employee> employees = new ArrayList<>();
-    
+
+    // --- THÊM VÀO DEPENDENCY MỚI (Lab 4) ---
+    private final EmployeeRepository employeeRepository;
+    private final DepartmentRepository departmentRepository;
+
     @Autowired
-    public EmployeeService(UtilityService utilityService, SimplePasswordEncoder passwordEncoder) {
-        this.utilityService = utilityService;
-        this.passwordEncoder = passwordEncoder;
-        
-        //mock data
-        createEmployee("John Doe", 1, "pass123");
-        createEmployee("JaneSmith", 2, "pass456");
+    public EmployeeService(EmployeeRepository employeeRepository, DepartmentRepository departmentRepository) {
+        // Khởi tạo các repository
+        this.employeeRepository = employeeRepository;
+        this.departmentRepository = departmentRepository;
     }
 
-    public Employee createEmployee(String name, int id, String password) {
-        String empCode = utilityService.generateEmployeeCode(id);
-        String formattedName = utilityService.formatName(name);
-        String encodedPassword = passwordEncoder.encode(password); //Luu vap DB
-        
-        Employee newEmployee = new Employee(id, empCode, formattedName);
-        employees.add(newEmployee);
+    public Employee createEmployee(CreateEmployeeRequest request) {
+        Department department = departmentRepository.findById(request.getDepartmentId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy Department với ID: " + request.getDepartmentId()));
 
-        return newEmployee;
+        Employee employee = new Employee();
+        employee.setName(request.getName());
+        employee.setEmail(request.getEmail());
+        employee.setDepartment(department);
+
+        return employeeRepository.save(employee);
     }
 
     public List<Employee> listEmployees() {
-        return employees;
+        // Gọi hàm findAll() của JpaRepository
+        return employeeRepository.findAll();
     }
-    
-    public Employee findEmployeeById(int id) {
-        return employees.stream()
-                .filter(emp -> emp.getId() == id)
-                .findFirst()
-                .orElse(null);
+
+    public Employee findEmployeeById(Long id) { 
+        return employeeRepository.findById(id)
+                .orElse(null); 
+    }
+
+    public List<Employee> searchEmployees(String query) {
+        return employeeRepository.findByNameContainingIgnoreCaseOrDepartment_NameContainingIgnoreCase(query, query);
     }
 }
