@@ -1,8 +1,21 @@
 package com.example.employee_management.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
 public class CreateEmployeeRequest {
+    
+    @NotBlank(message = "Tên nhân viên không được để trống")
+    @Size(min = 2, max = 100, message = "Tên phải có từ 2 đến 100 ký tự")
     private String name;
+    
+    @NotBlank(message = "Email không được để trống")
+    @Email(message = "Email không đúng định dạng")
     private String email;
+    
+    @NotNull(message = "Department ID không được để trống")
     private Long departmentId; 
 
     public String getName() {

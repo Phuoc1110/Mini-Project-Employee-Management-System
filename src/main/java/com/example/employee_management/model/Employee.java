@@ -1,6 +1,9 @@
 package com.example.employee_management.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table(name = "employees")
@@ -10,11 +13,16 @@ public class Employee {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id; 
 
+    @NotBlank(message = "Tên nhân viên không được để trống")
+    @Size(min = 2, max = 100, message = "Tên phải có từ 2 đến 100 ký tự")
     private String name;
+    
+    @NotBlank(message = "Email không được để trống")
+    @Email(message = "Email không đúng định dạng")
     private String email;
 
     @ManyToOne
-    @JoinColumn(name = "department_id") // Tên của cột khóa ngoại trong bảng 'employees'
+    @JoinColumn(name = "department_id")
     private Department department;
 
     public Long getId() {
